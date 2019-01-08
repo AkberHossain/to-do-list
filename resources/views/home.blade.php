@@ -5,22 +5,23 @@
     <h1>TO DO LIST</h1>
     <br>
     
-    <form method="POST" action=""  id="form-todo">
+    <form method="POST" action="" onsubmit="" id="form-todo">
         {{ csrf_field() }}
         <input type="text" name="todo" class="form-control" id="text-box">
         <br>
         
-        <input type="submit" name="submit" class="btn btn-success btn-lg" id="add-btn" value="Add to your list" >
+        <button type="button"  class="btn btn-success btn-lg" id="add-btn" > Add to your list </button>
     <form>
     <br>
     <br>
 
     @foreach($todos as $todo)
 
-        <div class="alert alert-primary" id="todo-box" role="alert">
+        <div <?php if($todo->completed == 0){ echo "class = 'alert alert-danger' ";  } else{ echo "class = 'alert alert-success' "; } ?> data-id="{{ $todo->id }}" id="todo-box" role="alert">
             <strong>{{ $todo->todo }}</strong>
-            <button type="button" class="btn btn-warning btn-sm float-left">
-                <span>Mark as Completed</span>
+            {{ csrf_field() }}
+            <button type="button" id="mark" class="btn btn-warning btn-sm float-left">
+                <span><?php if($todo->completed == 0){ echo "Mark As Completed ";  } else{ echo "Mark As Incompleted "; } ?></span>
             </button>
             <button type="button" class="close">
                 <span aria-hidden="true">&times;</span>
@@ -29,37 +30,59 @@
 
     @endforeach
 
+
     <script>
 
         $(document).ready(function(){
 
-            $("#form-todo").submit(function(){
+            $(document).on("click" , "#mark" ,function(){
+                
+                var id = $(this).parent().attr("data-id");
 
                 $.ajax({
-                    url:{{route('todo.store')}} ,
-                    type:"POST" ,
-                    data: ,
+                    url:"/update/"+id , 
+                    type:"POST",
+                    data:{'_token':$("input[name=_token").val()},
                     success:function(){
-                        alert("done");
+                        window.location.reload();
                     }
                 });
 
             });
 
-            // $("form").submit(function(){
+            $(document).on("click" , ".close" , function(){
 
-            //     $.ajax({
-            //         url:"{{route('todo.store')}}" , 
-            //         data:$(this).serialize() ,
-            //         type:"GET" ,
-            //         success:function(data){
+                var id = $(this).parent().attr("data-id");
 
-            //             alert("ss");
+                $.ajax({
+                    url:"/delete/"+id ,
+                    //type:"POST",
+                    method:"DELETE" ,
+                    data:{'_token':$("input[name=_token]").val()} ,
+                    success:function(){
+                        window.location.reload();  
+                    }
+                });
 
-            //         }
-            //     });
+            });
 
-            // });
+
+            $("#add-btn").click(function(){
+
+                $.ajax({
+                    url:`{{route('todo.store')}}` ,
+                    type:"POST" ,
+                    data: $("#form-todo").serialize(),
+                    success:function(){
+                        window.location.reload();
+                    }
+                });
+
+            });
+
+            
+            
+
 
 
 

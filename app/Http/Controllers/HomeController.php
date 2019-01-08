@@ -24,7 +24,7 @@ class HomeController extends Controller
      */
     public function index()
     {
-        $todos = Todo::all();
+        $todos = Todo::where('user_id' , auth()->id())->get();
 
         return view('home' , compact('todos') );
     }
